@@ -1,0 +1,74 @@
+version: "1.0"
+description: "Procedural Knowledge Ontology for Industrial Troubleshooting"
+
+classes:
+  - name: Condition
+    description: "A condition or check that must be evaluated"
+    properties:
+      - has_question
+      - has_outcome
+      - requires_check
+  
+  - name: Action
+    description: "An action or procedure to be performed"
+    properties:
+      - has_verb
+      - affects_component
+      - has_result
+  
+  - name: Observation
+    description: "A descriptive observation or state"
+    properties:
+      - describes_state
+      - contains_measurement
+  
+  - name: Component
+    description: "A physical component, part, or system"
+    properties:
+      - has_name
+      - has_type
+      - has_location
+  
+  - name: Result
+    description: "An outcome or result of a condition or action"
+    properties:
+      - is_positive
+      - is_negative
+      - requires_followup
+  
+  - name: Connector
+    description: "A reference or code linking procedural steps"
+    properties:
+      - has_code
+      - links_to_step
+
+relations:
+  - name: leads_to
+    description: "Indicates that one procedural unit leads to another"
+    domain: [Condition, Action, Connector]
+    range: [Action, Result, Condition]
+    properties:
+      - has_confidence
+      - has_evidence
+  
+  - name: requires_check
+    description: "Indicates that an action requires checking a condition"
+    domain: [Action]
+    range: [Condition]
+    properties:
+      - has_priority
+  
+  - name: affects
+    description: "Indicates that an action affects a component"
+    domain: [Action]
+    range: [Component]
+    properties:
+      - has_impact_type
+  
+  - name: equivalent_to
+    description: "Indicates that two entities are equivalent"
+    domain: [Component, Condition, Action]
+    range: [Component, Condition, Action]
+    properties:
+      - has_similarity_score
+
