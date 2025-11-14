@@ -1,0 +1,30 @@
+# PDF Processing
+pdf2image>=1.16.0
+pdfplumber>=0.10.0
+PyMuPDF>=1.23.0
+
+# OCR
+pytesseract>=0.3.10
+easyocr>=1.7.0
+paddlepaddle>=2.5.0
+paddleocr>=2.7.0
+
+# NLP and Semantic Processing
+spacy>=3.7.0
+pyyaml>=6.0
+
+# Image Processing (for OCR)
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# Graph Processing (optional, for advanced graph operations)
+networkx>=3.1
+
+# Graph Visualization
+pyvis>=0.3.2
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Type hints (for Python < 3.9)
+typing-extensions>=4.8.0
