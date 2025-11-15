@@ -1,0 +1,26 @@
+# Entity and relation type definitions for procedural knowledge extraction
+
+entity_types:
+  - Condition
+  - Action
+  - Decision
+  - Observation
+  - Component
+
+relation_types:
+  - leads_to
+  - applies_to_component
+  - has_outcome
+
+entity_descriptions:
+  Condition: "A condition or state that must be checked"
+  Action: "An action or step to be performed"
+  Decision: "A decision point with multiple possible outcomes"
+  Observation: "An observation or measurement result"
+  Component: "A physical component or part of the system"
+
+relation_descriptions:
+  leads_to: "Indicates that one entity leads to or causes another"
+  applies_to_component: "Indicates that an action or condition applies to a specific component"
+  has_outcome: "Indicates that a decision or condition has a specific outcome"
+

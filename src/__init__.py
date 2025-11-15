@@ -1,5 +1,3 @@
 """
-Procedural Knowledge Graphs Extraction from Industrial Maintenance Troubleshooting Guides
+Procedural Knowledge Extraction from Industrial Troubleshooting Guides Using Vision Language Models
 """
-
-__version__ = "0.1.0"

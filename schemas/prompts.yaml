@@ -1,0 +1,81 @@
+# Prompts for zero-shot and few-shot inference
+# Used by all VLM models
+
+zero_shot_prompt: |
+  Analyze this troubleshooting flowchart image and extract procedural knowledge.
+
+  Identify all entities (Condition, Action, Decision, Observation, Component) and their relationships.
+
+  For each entity, provide:
+  - text: The exact text content
+  - type: One of Condition, Action, Decision, Observation, Component
+  - bbox: Bounding box coordinates [x1, y1, x2, y2] in pixels
+
+  For each relationship, provide:
+  - source_text: Text of the source entity
+  - target_text: Text of the target entity
+  - type: One of leads_to, applies_to_component, has_outcome
+
+  Return your response as a JSON object with this exact structure:
+  {
+    "entities": [
+      {"text": "...", "type": "Condition", "bbox": [x1, y1, x2, y2], "confidence": 0.9}
+    ],
+    "relations": [
+      {"source_text": "...", "target_text": "...", "type": "leads_to"}
+    ]
+  }
+
+  Only return the JSON object, no additional text.
+
+few_shot_intro: |
+  Analyze this troubleshooting flowchart image and extract procedural knowledge.
+
+  Here are some examples of correct extractions:
+
+few_shot_instruction: |
+  Now analyze the target image and extract entities and relations in the same format.
+
+  Return your response as a JSON object with this exact structure:
+  {
+    "entities": [
+      {"text": "...", "type": "Condition", "bbox": [x1, y1, x2, y2], "confidence": 0.9}
+    ],
+    "relations": [
+      {"source_text": "...", "target_text": "...", "type": "leads_to"}
+    ]
+  }
+
+  Only return the JSON object, no additional text.
+
+text_baseline_prompt_template: |
+  Analyze this troubleshooting guide text and extract procedural knowledge.
+
+  Text content:
+  {text}
+
+  Identify all entities (Condition, Action, Decision, Observation, Component) and their relationships.
+
+  For each entity, provide:
+  - text: The exact text content
+  - type: One of Condition, Action, Decision, Observation, Component
+
+  For each relationship, provide:
+  - source_text: Text of the source entity
+  - target_text: Text of the target entity
+  - type: One of leads_to, applies_to_component, has_outcome
+
+  Note: Since this is text-only analysis, no bounding box coordinates are available.
+
+  Return your response as a JSON object with this exact structure:
+  {
+    "entities": [
+      {"text": "...", "type": "Condition"}
+    ],
+    "relations": [
+      {"source_text": "...", "target_text": "...", "type": "leads_to"}
+    ]
+  }
+
+  Only return the JSON object, no additional text.
+

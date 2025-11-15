@@ -1,290 +1,173 @@
-# Procedural Knowledge Graphs Extraction from Industrial Maintenance Troubleshooting Guides
+# Procedural Knowledge Extraction from Industrial Troubleshooting Guides
 
-This project extracts **procedural knowledge graphs** from industrial troubleshooting PDFs (TOCAPs/OCAPs) using a **hybrid approach** combining **spatial/layout analysis** and **semantic NLP techniques**. The pipeline constructs a procedural knowledge ontology capturing conditions, actions, components, and their relationships.
+A minimal, modular pipeline for extracting procedural knowledge from industrial troubleshooting guides using vision language models (VLMs) and evaluating performance against manual annotations.
 
 ## Overview
 
-The extraction pipeline uses a **two-stage hybrid approach**:
-
-1. **Spatial Extractor**: Handles PDF text extraction with bounding boxes, spatial grouping, and layout-based inference (column positions, shape types)
-2. **Semantic Extractor**: Performs NLP-based classification, entity extraction, and semantic relation inference
-
-The pipeline identifies:
-- **Conditions**: Questions and checks that must be evaluated
-- **Actions**: Procedures and steps to be performed
-- **Observations**: Descriptive states and measurements
-- **Components**: Physical parts, systems, and entities
-- **Relations**: Semantic and spatial links between procedural units (leads_to, affects, requires_check)
+This project processes annotated troubleshooting guides, runs several vision language models in zero-shot or few-shot mode, extracts procedural entities and relations according to a fixed label set, and evaluates performance against manual annotations and a text-only baseline model.
 
 ## Project Structure
 
 ```
 .
-├── pipeline_orchestrator.py     # Main entry point (orchestrates spatial + semantic)
-├── ontology.yaml                # Ontology schema definition
-├── src/
-│   ├── __init__.py
-│   ├── spatial_extractor.py    # Spatial/layout extraction module
-│   ├── semantic_extractor.py   # Semantic NLP extraction module
-│   ├── visualize_graph.py      # Graph visualization
-│   └── visualize_ocr.py        # OCR bounding box visualization (debug)
 ├── data/
-│   ├── raw/
-│   │   └── TOCAPs/              # PDF files (gitignored)
-│   ├── processed/               # Extracted graphs (gitignored)
-│   ├── intermediate/            # Intermediate outputs (gitignored)
-│   └── glossary/
-│       └── components.json     # Domain component glossary
-├── docs/
-│   └── PRIVACY.md              # Privacy and security documentation
-├── requirements.txt            # Python dependencies
-└── README.md
+│   ├── pdf/              # Input PDF files (TOCAPs)
+│   └── annotations/      # Gold standard JSON annotations
+├── src/
+│   ├── data/
+│   │   └── loader.py     # PDF and annotation loading
+│   ├── labels/
+│   │   └── labels.py      # Label definitions (loads from schemas/labels.yaml)
+│   ├── inference/
+│   │   ├── vlm_inference.py        # VLM inference (Pixtral, InternVL2, Llava)
+│   │   └── baseline_text_model.py  # Text-only baseline
+│   ├── evaluation/
+│   │   ├── metrics.py     # Evaluation metrics (precision, recall, F1)
+│   │   └── run_evaluation.py  # Evaluation runner
+│   ├── utils/
+│   │   └── visualization.py  # Graph visualization utilities
+│   └── main.py           # Main pipeline orchestrator
+├── output/
+│   ├── graphs/           # Model predictions (JSON)
+│   └── evaluations/      # Evaluation results
+├── schemas/
+│   ├── labels.yaml       # Entity and relation type definitions
+│   └── prompts.yaml      # Zero-shot and few-shot prompts
+└── requirements.txt      # Python dependencies
 ```
+
+## Entity and Relation Types
+
+### Entity Types
+- **Condition**: A condition or state that must be checked
+- **Action**: An action or step to be performed
+- **Decision**: A decision point with multiple possible outcomes
+- **Observation**: An observation or measurement result
+- **Component**: A physical component or part of the system
+
+### Relation Types
+- **leads_to**: Indicates that one entity leads to or causes another
+- **applies_to_component**: Indicates that an action or condition applies to a specific component
+- **has_outcome**: Indicates that a decision or condition has a specific outcome
+
+## Annotation Format
+
+Gold standard annotations are stored as JSON files with the following structure:
+
+```json
+{
+  "entities": [
+    {
+      "id": "E1",
+      "type": "Condition",
+      "text": "...",
+      "bbox": [x1, y1, x2, y2],
+      "page": 1
+    }
+  ],
+  "relations": [
+    {
+      "source": "E1",
+      "target": "E2",
+      "type": "leads_to"
+    }
+  ]
+}
+```
+
+## Models
+
+### Vision Language Models (VLMs)
+- **Pixtral 12B Vision Instruct**: Large vision-language model
+- **InternVL2 8B**: Efficient vision-language model
+- **Llava One Vision**: Lightweight vision-language model
+
+### Baseline
+- **Mistral 7B Instruct** (text-only): Processes extracted PDF text without images
 
 ## Installation
 
-### 1. Clone the repository
-
-```bash
-git clone <repository-url>
-cd Procedural-Knowledge-Graphs-Extraction-from-Industrial-Maintenance-Troubleshooting-Guides
-```
-
-### 2. Install system dependencies
-
-**Poppler** (required for PDF to image conversion):
-- **macOS**: `brew install poppler`
-- **Linux (Ubuntu/Debian)**: `sudo apt-get install poppler-utils`
-- **Linux (Fedora/RHEL)**: `sudo dnf install poppler-utils`
-- **Windows**: Download from [poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases/)
-
-**Tesseract OCR** (optional, if using tesseract engine):
-- **macOS**: `brew install tesseract tesseract-lang`
-- **Linux**: `sudo apt-get install tesseract-ocr tesseract-ocr-nld`
-- **Windows**: Download from [UB-Mannheim/tesseract](https://github.com/UB-Mannheim/tesseract/wiki)
-
-### 3. Install Python dependencies
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Download SpaCy Dutch model
-
-```bash
-python -m spacy download nl_core_news_sm
-```
-
-## Quick Start
+## Usage
 
 ### Basic Usage
 
+Run the full pipeline with all models:
+
 ```bash
-# Extract procedural knowledge from a PDF
-python pipeline_orchestrator.py data/raw/TOCAPs/DP17-TOCAP4.pdf
-
-# The pipeline automatically generates debug outputs including:
-# - OCR bounding box visualizations in data/intermediate/
-# - Files: ocr_bboxes_pdfplumber_page_N.png, ocr_bboxes_tesseract_page_N.png, etc.
-# - Intermediate JSON files for debugging
-
-# Using EasyOCR instead of Tesseract (for OCR fallback)
-python pipeline_orchestrator.py data/raw/TOCAPs/DP17-TOCAP4.pdf --ocr-engine easyocr
-
-# Specify custom ontology schema
-python pipeline_orchestrator.py data/raw/TOCAPs/DP17-TOCAP4.pdf --ontology custom_ontology.yaml
+python src/main.py --data_dir data --output_dir output
 ```
 
-**Note**: The orchestrator automatically clears previous outputs from `data/processed/` and `data/intermediate/` (including debug visualizations) before each run.
+### Run Specific Models
 
-### Python API
-
-```python
-from src.spatial_extractor import SpatialExtractor
-from src.semantic_extractor import SemanticExtractor
-
-# Initialize extractors
-spatial_extractor = SpatialExtractor(debug=True)
-semantic_extractor = SemanticExtractor(
-    ocr_engine="tesseract",  # or "easyocr"
-    language="nld",
-    debug=True
-)
-
-# Step 1: Extract text with spatial information
-text_blocks, page_widths = spatial_extractor.extract_text_blocks("path/to/file.pdf")
-spatial_info = spatial_extractor.infer_spatial_info(text_blocks, page_widths)
-
-# Step 2: Semantic classification and entity extraction
-units = semantic_extractor.segment_procedural_units(text_blocks)
-entities = semantic_extractor.extract_entities(text_blocks)
-relations = semantic_extractor.infer_relations(units, entities)
-
-# Step 3: Build final graph
-graph = semantic_extractor.build_ontology_graph(units, entities, relations)
-```
-
-Or use the orchestrator:
-
-```python
-# Run full hybrid pipeline
-graph = extractor.extract_full_pipeline(
-    pdf_path="data/raw/TOCAPs/DP17-TOCAP4.pdf",
-    ontology_path="ontology.yaml"
-)
-
-# Access results
-print(f"Procedural Units: {graph['metadata']['total_units']}")
-print(f"Entities: {graph['metadata']['total_entities']}")
-print(f"Relations: {graph['metadata']['total_relations']}")
-```
-
-## Pipeline Steps
-
-The semantic extraction pipeline consists of 5 steps:
-
-### Step 1: Semantic OCR Extraction
-- Extracts text from PDF pages using OCR (Tesseract or EasyOCR)
-- Preserves reading order
-- Output: JSON with text lines per page
-
-### Step 2: Step Segmentation
-- Classifies each line using regex patterns and NLP (SpaCy)
-- Types: Condition, Action, Observation, Connector
-- Output: Structured procedural units with confidence scores
-
-### Step 3: Entity & Component Extraction
-- Extracts components using domain glossary
-- Uses noun phrase extraction with SpaCy
-- Output: Entity nodes with mention locations
-
-### Step 4: Relation Inference (Weak Supervision)
-- Applies heuristic rules to infer relations:
-  - Condition → Action (adjacent within 3 lines)
-  - Action → Component (action mentions component)
-  - Condition → Result (contains result keywords)
-  - Connector → Next step (sequential flow)
-- Output: Relations with confidence scores and evidence
-
-### Step 5: Ontology Construction
-- Builds knowledge graph from units, entities, and relations
-- Exports to RDF/Turtle (TTL) format
-- Output: JSON graph + TTL ontology file
-
-## Output Format
-
-### JSON Graph Structure
-
-```json
-{
-  "nodes": [
-    {
-      "id": "p1_l23",
-      "type": "Condition",
-      "label": "Is de vacuümdruk correct?",
-      "page": 1,
-      "line": 23,
-      "confidence": 0.85
-    },
-    {
-      "id": "entity_0",
-      "type": "Component",
-      "label": "vacuumfilter",
-      "mentions": 3,
-      "confidence": 0.9
-    }
-  ],
-  "edges": [
-    {
-      "source": "p1_l23",
-      "target": "p1_l24",
-      "relation": "leads_to",
-      "confidence": 0.8,
-      "evidence": "Adjacent condition-action"
-    }
-  ],
-  "metadata": {
-    "ontology_version": "1.0",
-    "total_units": 150,
-    "total_entities": 45,
-    "total_relations": 120
-  }
-}
-```
-
-### RDF/Turtle Output
-
-The pipeline also generates `data/intermediate/ontology.ttl` in RDF/Turtle format for integration with knowledge graph systems (Neo4j, RDF stores, etc.).
-
-### Interactive Graph Visualization
-
-The pipeline automatically generates an interactive HTML visualization (`data/processed/graph_visualization_<pdf_name>.html`) that you can open in any web browser. The visualization shows:
-
-- **Color-coded nodes** by type:
-  - Red: Conditions
-  - Teal: Actions
-  - Light teal: Observations
-  - Purple: Connectors
-  - Pink: Components
-- **Interactive features**: Click and drag nodes, zoom, pan, hover for details
-- **Edge labels**: Shows relation types (leads_to, affects, etc.)
-
-You can also generate visualizations manually:
 ```bash
-python src/visualize_graph.py data/processed/semantic_graph_DP17-TOCAP4.json
+python src/main.py --models pixtral internvl --mode zero_shot
 ```
 
-## Ontology Schema
+### Run Only Evaluation
 
-The ontology is defined in `ontology.yaml` with:
-- **Classes**: Condition, Action, Observation, Component, Result, Connector
-- **Relations**: leads_to, requires_check, affects, equivalent_to
+If predictions already exist:
 
-Customize the schema by editing `ontology.yaml`.
-
-## Component Glossary
-
-Domain-specific components are defined in `data/glossary/components.json`. Add or modify entries to improve entity extraction for your domain.
-
-## Privacy & Security
-
-All processing is performed **100% locally and offline**. No data is sent to external services. The only network activity is:
-- Initial download of SpaCy Dutch model (one-time, cached locally)
-- EasyOCR model download (one-time, if using EasyOCR)
-
-## Troubleshooting
-
-### Tesseract not found
 ```bash
-# macOS
-brew install tesseract tesseract-lang
-
-# Linux
-sudo apt-get install tesseract-ocr tesseract-ocr-nld
+python src/main.py --skip_inference
 ```
 
-### SpaCy Dutch model not found
+### Command Line Options
+
+- `--data_dir`: Data directory (default: `data`)
+- `--output_dir`: Output directory (default: `output`)
+- `--models`: Models to run: `pixtral`, `internvl`, `llava`, `text_baseline`, or `all` (default: `all`)
+- `--mode`: Inference mode: `zero_shot`, `few_shot`, or `both` (default: `both`)
+- `--device`: Device: `auto`, `cuda`, or `cpu` (default: `auto`)
+- `--skip_inference`: Skip inference and only run evaluation
+
+## Running on Habrok HPC
+
+The code is designed to run on both local machines and the Habrok HPC cluster at University of Groningen.
+
+### Example Slurm Script
+
 ```bash
-python -m spacy download nl_core_news_sm
+#!/bin/bash
+#SBATCH --job-name=vlm_extraction
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:1
+#SBATCH --time=24:00:00
+#SBATCH --mem=32G
+
+module load Python/3.10.4-GCCcore-11.3.0
+source venv/bin/activate
+
+python src/main.py --data_dir data --output_dir output --models pixtral --mode zero_shot
 ```
 
-### Poppler not found
-```bash
-# macOS
-brew install poppler
+## Output
 
-# Linux
-sudo apt-get install poppler-utils
-```
+### Predictions
+Model predictions are saved in `output/graphs/` as JSON files:
+- `{guide_name}_{model_name}_zero_shot.json`
+- `{guide_name}_{model_name}_few_shot.json`
 
-## Migration from Old Pipeline
+### Evaluations
+Evaluation results are saved in `output/evaluations/all_results.json` and include:
+- Entity precision, recall, F1
+- Relation precision, recall, F1
+- Overall graph reconstruction F1
 
-The previous visual layout parsing approach (`flowchart_extractor.py`) has been **deprecated**. The new semantic extraction pipeline provides:
-- Hybrid approach combining spatial layout analysis with semantic NLP
-- Better understanding of procedural content through both layout and semantics
-- More robust extraction across different PDF formats
-- Structured ontology output for knowledge graph systems
+## Evaluation Metrics
+
+The pipeline computes:
+1. **Entity Metrics**: Precision, recall, F1 for entity extraction (matching by type and text similarity > 0.7)
+2. **Relation Metrics**: Precision, recall, F1 for relation extraction (matching by type and aligned entity IDs)
+3. **Graph Reconstruction Score**: Overall F1 combining entity and relation metrics
 
 ## License
 
-See LICENSE file for details.
+MIT License - see LICENSE file for details.
+
