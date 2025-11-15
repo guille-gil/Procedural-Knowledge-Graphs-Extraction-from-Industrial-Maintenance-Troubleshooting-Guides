@@ -205,3 +205,19 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project specific
+# Generated PNG images from PDFs (output files - ignore these)
+data/processed/
+data/**/*.png
+data/**/*.PNG
+
+# Keep source PDFs and annotations (explicitly allow these)
+!data/pdf/
+!data/pdf/**/*.pdf
+!data/annotations/
+!data/annotations/**/*.json
+
+# macOS
+.DS_Store
+**/.DS_Store

@@ -1,0 +1,8 @@
+# Minimal dependencies for PDF to PNG conversion
+
+# PDF processing
+PyMuPDF>=1.23.0
+
+# Image processing
+Pillow>=10.0.0
+
