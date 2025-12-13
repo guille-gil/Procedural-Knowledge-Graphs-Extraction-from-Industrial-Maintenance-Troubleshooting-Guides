@@ -1,1 +1,0 @@
-"""Label definitions module."""
