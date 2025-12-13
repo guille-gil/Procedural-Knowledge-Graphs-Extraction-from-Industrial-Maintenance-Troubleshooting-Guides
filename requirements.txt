@@ -1,0 +1,26 @@
+# Core dependencies for procedural knowledge extraction pipeline
+# Minimal set for local and HPC (Habrok) execution
+
+# PDF processing
+PyMuPDF>=1.23.0
+
+# Image processing
+Pillow>=10.0.0
+
+# Deep learning frameworks
+torch>=2.0.0
+transformers>=4.35.0
+
+# Graph visualization
+networkx>=3.0
+matplotlib>=3.7.0
+
+# Utilities
+numpy>=1.24.0
+PyYAML>=6.0
+
+
+# Evaluation dependencies
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.23.0
+spacy>=3.7.0
