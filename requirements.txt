@@ -1,26 +1,14 @@
-# Core dependencies for procedural knowledge extraction pipeline
-# Minimal set for local and HPC (Habrok) execution
-
-# PDF processing
-PyMuPDF>=1.23.0
-
-# Image processing
-Pillow>=10.0.0
-
-# Deep learning frameworks
-torch>=2.0.0
-transformers>=4.35.0
-
-# Graph visualization
-networkx>=3.0
-matplotlib>=3.7.0
-
-# Utilities
-numpy>=1.24.0
-PyYAML>=6.0
-
-
-# Evaluation dependencies
+# Evaluation dependencies (used by src/evaluation/*.py)
+spacy>=3.7.0
 fuzzywuzzy>=0.18.0
 python-Levenshtein>=0.23.0
-spacy>=3.7.0
+
+# VLM Inference dependencies (used by Jupyter notebooks)
+torch>=2.0.0
+transformers>=4.35.0
+accelerate>=0.20.0
+Pillow>=10.0.0
+qwen-vl-utils>=0.0.8
+
+# Note: Install Dutch spaCy model separately:
+# python -m spacy download nl_core_news_sm
