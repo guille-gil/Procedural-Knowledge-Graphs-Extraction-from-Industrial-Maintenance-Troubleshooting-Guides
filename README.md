@@ -1,8 +1,6 @@
 # Procedural Knowledge Extraction from Industrial Troubleshooting Guides
 
-> **Research Context**: This repository contains the implementation for evaluating Vision Language Models (VLMs) on extracting structured procedural knowledge from industrial troubleshooting diagrams. This work is part of a paper submitted to **IFAC World Congress 2026**.
-
-**Authors**: Guillermo Gil de Avalle, Laura Maruster, Christos Emmanouilidis (University of Groningen, The Netherlands)
+Guillermo Gil de Avalle, Laura Maruster, Christos Emmanouilidis (University of Groningen, The Netherlands)
 
 Funding for the research was provided through Horizon Europe project AIXpert (ID: 101214389)
 
