@@ -193,18 +193,6 @@ jupyter nbconvert --to notebook --execute src/inference/Pixtral-12b.ipynb
 
 ## Citation
 
-If you use this code or methodology, please cite:
-
-```bibtex
-@inproceedings{gil2026procedural,
-  title={Procedural Knowledge Extraction from Industrial Troubleshooting Guides Using Vision Language Models},
-  author={Gil de Avalle, Guillermo and Maruster, Laura and Emmanouilidis, Christos},
-  booktitle={IFAC World Congress 2026},
-  year={2026},
-  note={Funded by Horizon Europe project AIXpert (ID: 101214389)}
-}
-```
-
-## License
+This paper has been accepted to the 23rd World Congress of the International Federation of Automation Control (IFAC 2026). Please cite the subsequent publication if you make any use of the code above. 
 
 MIT License - see LICENSE file for details.
